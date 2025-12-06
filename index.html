@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG to PNG Converter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background-color: #121212;
+            color: #f0f0f0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            margin: 0 auto;
+            transition: background-color 0.3s;
+        }
+
+        .dark-mode .container {
+            background-color: #1e1e1e;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Header and title */
+        .tool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .dark-mode .tool-header {
+            border-bottom-color: #333;
+        }
+
+        .tool-title {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #9c27b0, #e91e63);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .dark-mode .tool-title {
+            background: linear-gradient(90deg, #ba68c8, #f06292);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .mode-toggle {
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 20px;
+            width: 50px;
+            height: 24px;
+            position: relative;
+            cursor: pointer;
+            padding: 2px;
+            transition: background-color 0.3s;
+        }
+
+        .dark-mode .mode-toggle {
+            background-color: #333;
+        }
+
+        .toggle-circle {
+            width: 20px;
+            height: 20px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            position: absolute;
+            left: 2px;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+
+        .dark-mode .toggle-circle {
+            transform: translateX(26px);
+            background-color: #ba68c8;
+        }
+
+        /* Instructions */
+        .instructions {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+            border-left: 4px solid #9c27b0;
+        }
+
+        .dark-mode .instructions {
+            background-color: #2a2a2a;
+            border-left-color: #ba68c8;
+        }
+
+        /* SVG info notice */
+        .svg-notice {
+            background-color: #f3e5f5;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 30px;
+            font-size: 14px;
+            line-height: 1.5;
+            border-left: 4px solid #9c27b0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .dark-mode .svg-notice {
+            background-color: #2a1b2e;
+            border-left-color: #ba68c8;
+        }
+
+        .notice-icon {
+            font-size: 20px;
+            color: #9c27b0;
+            margin-top: 2px;
+        }
+
+        .dark-mode .notice-icon {
+            color: #ba68c8;
+        }
+
+        .notice-content h4 {
+            margin-bottom: 6px;
+            color: #7b1fa2;
+            font-weight: 600;
+        }
+
+        .dark-mode .notice-content h4 {
+            color: #ce93d8;
+        }
+
+        .notice-content p {
+            color: #6a1b9a;
+            margin-bottom: 8px;
+        }
+
+        .dark-mode .notice-content p {
+            color: #e1bee7;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .feature-tag {
+            background-color: #e1bee7;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #6a1b9a;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dark-mode .feature-tag {
+            background-color: #6a1b9a;
+            color: #e1bee7;
+        }
+
+        .feature-tag.convert {
+            background-color: #c8e6c9;
+            color: #1b5e20;
+        }
+
+        .dark-mode .feature-tag.convert {
+            background-color: #1b5e20;
+            color: #c8e6c9;
+        }
+
+        /* Main content layout */
+        .tool-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        @media (min-width: 768px) {
+            .tool-content {
+                flex-direction: row;
+            }
+        }
+
+        /* Input and output sections */
+        .input-section, .output-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: #9c27b0;
+        }
+
+        .dark-mode .section-title i {
+            color: #ba68c8;
+        }
+
+        /* File upload area */
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: #fafafa;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .dark-mode .upload-area {
+            background-color: #2a2a2a;
+            border-color: #444;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: #9c27b0;
+            background-color: rgba(156, 39, 176, 0.05);
+        }
+
+        .dark-mode .upload-area:hover, .dark-mode .upload-area.dragover {
+            border-color: #ba68c8;
+            background-color: rgba(186, 104, 200, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #9c27b0;
+            margin-bottom: 15px;
+        }
+
+        .dark-mode .upload-icon {
+            color: #ba68c8;
+        }
+
+        .upload-text {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .upload-subtext {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .dark-mode .upload-subtext {
+            color: #aaa;
+        }
+
+        .upload-btn {
+            background-color: #9c27b0;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .upload-btn:hover {
+            background-color: #7b1fa2;
+            transform: translateY(-2px);
+        }
+
+        .upload-btn:active {
+            transform: translateY(0);
+        }
+
+        .dark-mode .upload-btn {
+            background-color: #ba68c8;
+        }
+
+        .dark-mode .upload-btn:hover {
+            background-color: #ab47bc;
+        }
+
+        /* SVG text input */
+        .svg-input-area {
+            margin-top: 15px;
+            display: none;
+        }
+
+        .svg-input-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dark-mode .svg-input-title {
+            color: #f0f0f0;
+        }
+
+        .svg-textarea {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 13px;
+            resize: vertical;
+            background-color: #fafafa;
+            transition: all 0.2s;
+        }
+
+        .dark-mode .svg-textarea {
+            background-color: #2a2a2a;
+            border-color: #444;
+            color: #f0f0f0;
+        }
+
+        .svg-textarea:focus {
+            outline: none;
+            border-color: #9c27b0;
+            box-shadow: 0 0 0 2px rgba(156, 39, 176, 0.1);
+        }
+
+        .dark-mode .svg-textarea:focus {
+            border-color: #ba68c8;
+            box-shadow: 0 0 0 2px rgba(186, 104, 200, 0.2);
+        }
+
+        /* Image preview area */
+        .preview-area {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #fafafa;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .dark-mode .preview-area {
+            background-color: #2a2a2a;
+            border-color: #444;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 6px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .preview-placeholder {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .dark-mode .preview-placeholder {
+            color: #aaa;
+        }
+
+        /* File info */
+        .file-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 15px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        .info-label {
+            color: #666;
+        }
+
+        .dark-mode .info-label {
+            color: #aaa;
+        }
+
+        .info-value {
+            font-weight: 500;
+        }
+
+        /* PNG options */
+        .png-options {
+            margin-top: 20px;
+            width: 100%;
+            display: none;
+        }
+
+        .png-options h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .dark-mode .png-options h3 {
+            color: #f0f0f0;
+        }
+
+        .option-group {
+            margin-bottom: 18px;
+        }
+
+        .option-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .option-value {
+            font-weight: 600;
+            color: #9c27b0;
+        }
+
+        .dark-mode .option-value {
+            color: #ba68c8;
+        }
+
+        .size-slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #e0e0e0;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .dark-mode .size-slider {
+            background: #444;
+        }
+
+        .size-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #9c27b0;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .dark-mode .size-slider::-webkit-slider-thumb {
+            background: #ba68c8;
+        }
+
+        .size-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #9c27b0;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .dark-mode .size-slider::-moz-range-thumb {
+            background: #ba68c8;
+        }
+
+        /* Format buttons */
+        .format-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .format-btn {
+            flex: 1;
+            padding: 10px 15px;
+            background-color: #f0f0f0;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+
+        .dark-mode .format-btn {
+            background-color: #2a2a2a;
+            border-color: #444;
+            color: #f0f0f0;
+        }
+
+        .format-btn:hover {
+            border-color: #9c27b0;
+            transform: translateY(-2px);
+        }
+
+        .format-btn.active {
+            background-color: #9c27b0;
+            border-color: #9c27b0;
+            color: white;
+        }
+
+        .dark-mode .format-btn.active {
+            background-color: #ba68c8;
+            border-color: #ba68c8;
+        }
+
+        /* Preset buttons */
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .preset-btn {
+            padding: 10px 15px;
+            background-color: #f0f0f0;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.2s;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .dark-mode .preset-btn {
+            background-color: #2a2a2a;
+            border-color: #444;
+            color: #f0f0f0;
+        }
+
+        .preset-btn:hover {
+            border-color: #9c27b0;
+            transform: translateY(-2px);
+        }
+
+        .preset-btn.active {
+            background-color: #9c27b0;
+            border-color: #9c27b0;
+            color: white;
+        }
+
+        .dark-mode .preset-btn.active {
+            background-color: #ba68c8;
+            border-color: #ba68c8;
+        }
+
+        .preset-size {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        /* Checkbox style */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .checkbox-label {
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-custom {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dark-mode .checkbox-custom {
+            border-color: #666;
+        }
+
+        .checkbox-custom.checked {
+            background-color: #9c27b0;
+            border-color: #9c27b0;
+        }
+
+        .dark-mode .checkbox-custom.checked {
+            background-color: #ba68c8;
+            border-color: #ba68c8;
+        }
+
+        .checkbox-custom.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        /* Background preview */
+        .background-preview {
+            margin-top: 15px;
+            padding: 10px;
+            background: repeating-conic-gradient(#ccc 0% 25%, white 0% 50%) 50% / 20px 20px;
+            border-radius: 6px;
+            display: none;
+            border: 1px solid #e0e0e0;
+        }
+
+        .background-preview-text {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .dark-mode .background-preview-text {
+            color: #aaa;
+        }
+
+        .background-preview-image {
+            max-width: 100%;
+            max-height: 80px;
+            border-radius: 4px;
+        }
+
+        /* Compression comparison */
+        .compression-comparison {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 3px solid #9c27b0;
+            display: none;
+        }
+
+        .dark-mode .compression-comparison {
+            background-color: #2a2a2a;
+            border-left-color: #ba68c8;
+        }
+
+        .comparison-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .comparison-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .comparison-label {
+            color: #666;
+        }
+
+        .dark-mode .comparison-label {
+            color: #aaa;
+        }
+
+        .comparison-value {
+            font-weight: 500;
+        }
+
+        .savings {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .increase {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        /* Loading animation */
+        .loading {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f0f0f0;
+            border-top: 3px solid #9c27b0;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        .dark-mode .loading-spinner {
+            border-color: #444;
+            border-top-color: #ba68c8;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .dark-mode .loading-text {
+            color: #aaa;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            padding: 10px 18px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            min-width: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+        }
+
+        .dark-mode .control-btn:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .convert-btn {
+            background-color: #9c27b0;
+            color: white;
+        }
+
+        .convert-btn:hover {
+            background-color: #7b1fa2;
+        }
+
+        .dark-mode .convert-btn {
+            background-color: #ba68c8;
+        }
+
+        .dark-mode .convert-btn:hover {
+            background-color: #ab47bc;
+        }
+
+        .download-btn {
+            background-color: #e91e63;
+            color: white;
+        }
+
+        .download-btn:hover {
+            background-color: #d81b60;
+        }
+
+        .dark-mode .download-btn {
+            background-color: #f06292;
+            color: white;
+        }
+
+        .dark-mode .download-btn:hover {
+            background-color: #ec407a;
+        }
+
+        .clear-btn {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .clear-btn:hover {
+            background-color: #e0e0e0;
+        }
+
+        .dark-mode .clear-btn {
+            background-color: #333;
+            color: #f0f0f0;
+        }
+
+        .dark-mode .clear-btn:hover {
+            background-color: #444;
+        }
+
+        /* Conversion status */
+        .conversion-status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .status-success {
+            background-color: rgba(156, 39, 176, 0.1);
+            color: #9c27b0;
+            border: 1px solid rgba(156, 39, 176, 0.3);
+        }
+
+        .dark-mode .status-success {
+            background-color: rgba(186, 104, 200, 0.1);
+            color: #ba68c8;
+            border: 1px solid rgba(186, 104, 200, 0.3);
+        }
+
+        .status-error {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-warning {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        /* Footer */
+        .tool-footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eaeaea;
+            text-align: center;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .dark-mode .tool-footer {
+            border-top-color: #333;
+            color: #aaa;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 767px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .tool-title {
+                font-size: 24px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .control-btn {
+                width: 100%;
+            }
+            
+            .format-buttons {
+                flex-direction: column;
+            }
+            
+            .preset-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .png-options {
+                margin-top: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tool-header">
+            <h1 class="tool-title">SVG to PNG Converter</h1>
+            <button class="mode-toggle" id="modeToggle">
+                <div class="toggle-circle"></div>
+            </button>
+        </div>
+
+        <div class="instructions">
+            <p>Convert SVG (Scalable Vector Graphics) to PNG format. SVG is perfect for logos, icons, and illustrations, while PNG is ideal for web use with transparency support. All processing happens in your browser - no data is uploaded to any server.</p>
+        </div>
+
+        <div class="svg-notice">
+            <div class="notice-icon">🎨</div>
+            <div class="notice-content">
+                <h4>Vector Graphics Power</h4>
+                <p>SVG files are resolution-independent vector graphics that can scale infinitely without quality loss. Convert them to PNG for:</p>
+                <div class="feature-list">
+                    <div class="feature-tag">🖼️ Web compatibility</div>
+                    <div class="feature-tag">📱 Social media</div>
+                    <div class="feature-tag">🎯 Transparency support</div>
+                    <div class="feature-tag">⚡ Fast loading</div>
+                    <div class="feature-tag convert">✅ Any size PNG output</div>
+                </div>
+                <p style="margin-top: 8px; font-size: 12px;">SVG files contain mathematical descriptions of shapes, making them perfect for logos, icons, and illustrations.</p>
+            </div>
+        </div>
+
+        <div class="tool-content">
+            <div class="input-section">
+                <h2 class="section-title">
+                    <i>📤</i> Input (SVG)
+                </h2>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">🎨</div>
+                    <p class="upload-text">Drop your SVG files here</p>
+                    <p class="upload-subtext">.svg files or paste SVG code</p>
+                    <button class="upload-btn">Choose Files</button>
+                    <input type="file" id="fileInput" accept=".svg,.SVG,image/svg+xml" multiple style="display: none;">
+                </div>
+
+                <div class="loading" id="loadingIndicator">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Processing SVG...</div>
+                </div>
+
+                <div class="svg-input-area" id="svgInputArea">
+                    <div class="svg-input-title">
+                        <span>📝 Edit SVG Code</span>
+                    </div>
+                    <textarea class="svg-textarea" id="svgTextarea" placeholder="Paste SVG code here or edit the loaded SVG..."></textarea>
+                    <button class="upload-btn" id="updateSvgBtn" style="margin-top: 10px; width: 100%;">Update SVG Preview</button>
+                </div>
+
+                <div class="file-info" id="fileInfo" style="display: none;">
+                    <div class="info-row">
+                        <span class="info-label">File name:</span>
+                        <span class="info-value" id="fileName">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">File size:</span>
+                        <span class="info-value" id="fileSize">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Original size:</span>
+                        <span class="info-value" id="originalDimensions">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Output size:</span>
+                        <span class="info-value" id="outputDimensions">-</span>
+                    </div>
+                </div>
+
+                <div class="background-preview" id="backgroundPreview">
+                    <div class="background-preview-text">Transparency Preview:</div>
+                    <img class="background-preview-image" id="backgroundPreviewImage" src="" alt="Transparency preview">
+                </div>
+
+                <div class="png-options" id="pngOptions">
+                    <h3>PNG Output Settings</h3>
+                    
+                    <div class="option-group">
+                        <div class="option-label">
+                            <span>Output Size:</span>
+                            <span class="option-value" id="sizeValue">1024px</span>
+                        </div>
+                        <input type="range" min="64" max="4096" value="1024" step="64" class="size-slider" id="sizeSlider">
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-top: 5px;">
+                            <span>Small (64px)</span>
+                            <span>Large (4096px)</span>
+                        </div>
+                    </div>
+
+                    <div class="option-group">
+                        <div class="option-label">
+                            <span>Quick Presets:</span>
+                        </div>
+                        <div class="preset-buttons">
+                            <button class="preset-btn" data-size="64">
+                                <span>Icon</span>
+                                <span class="preset-size">64×64px</span>
+                            </button>
+                            <button class="preset-btn" data-size="256">
+                                <span>Small</span>
+                                <span class="preset-size">256×256px</span>
+                            </button>
+                            <button class="preset-btn" data-size="512">
+                                <span>Medium</span>
+                                <span class="preset-size">512×512px</span>
+                            </button>
+                            <button class="preset-btn active" data-size="1024">
+                                <span>Large</span>
+                                <span class="preset-size">1024×1024px</span>
+                            </button>
+                            <button class="preset-btn" data-size="2048">
+                                <span>HD</span>
+                                <span class="preset-size">2048×2048px</span>
+                            </button>
+                            <button class="preset-btn" data-size="4096">
+                                <span>4K</span>
+                                <span class="preset-size">4096×4096px</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="option-group">
+                        <div class="option-label">
+                            <span>Background:</span>
+                        </div>
+                        <div class="format-buttons">
+                            <button class="format-btn active" data-bg="transparent">Transparent</button>
+                            <button class="format-btn" data-bg="white">White</button>
+                            <button class="format-btn" data-bg="custom">Custom Color</button>
+                        </div>
+                    </div>
+
+                    <div class="option-group" id="customColorGroup" style="display: none;">
+                        <div class="option-label">
+                            <span>Custom Color:</span>
+                            <span class="option-value" id="colorValue">#ffffff</span>
+                        </div>
+                        <input type="color" id="colorPicker" value="#ffffff" style="width: 100%; height: 40px; border-radius: 6px; border: 2px solid #ddd; cursor: pointer;">
+                    </div>
+
+                    <div class="checkbox-group">
+                        <div class="checkbox-label" id="preserveAspectLabel">
+                            <div class="checkbox-custom checked" id="aspectCheckbox"></div>
+                            <span>Preserve aspect ratio (square)</span>
+                        </div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <div class="checkbox-label" id="antiAliasLabel">
+                            <div class="checkbox-custom checked" id="antiAliasCheckbox"></div>
+                            <span>Anti-aliasing (smoother edges)</span>
+                        </div>
+                    </div>
+
+                    <div class="compression-comparison" id="compressionComparison">
+                        <div class="comparison-title">Output Information</div>
+                        <div class="comparison-row">
+                            <span class="comparison-label">Vector size:</span>
+                            <span class="comparison-value" id="vectorSize">-</span>
+                        </div>
+                        <div class="comparison-row">
+                            <span class="comparison-label">Raster size:</span>
+                            <span class="comparison-value" id="rasterSize">-</span>
+                        </div>
+                        <div class="comparison-row">
+                            <span class="comparison-label">Scale factor:</span>
+                            <span class="comparison-value" id="scaleFactor">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="output-section">
+                <h2 class="section-title">
+                    <i>📥</i> Output (PNG)
+                </h2>
+                <div class="preview-area" id="previewArea">
+                    <img class="preview-image" id="previewImage" src="" alt="Converted PNG preview">
+                    <p class="preview-placeholder" id="previewPlaceholder">Converted PNG will appear here</p>
+                </div>
+
+                <div class="conversion-status" id="conversionStatus"></div>
+
+                <div class="controls">
+                    <button class="control-btn convert-btn" id="convertBtn">
+                        <span>Convert to PNG</span>
+                    </button>
+                    <button class="control-btn download-btn" id="downloadBtn" disabled>
+                        <span>Download PNG</span>
+                    </button>
+                    <button class="control-btn clear-btn" id="clearBtn">
+                        <span>Clear All</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="tool-footer">
+            <p>Professional SVG to PNG Converter • Vector to Raster Conversion • All processing done client-side</p>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewArea = document.getElementById('previewArea');
+        const previewImage = document.getElementById('previewImage');
+        const previewPlaceholder = document.getElementById('previewPlaceholder');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const originalDimensions = document.getElementById('originalDimensions');
+        const outputDimensions = document.getElementById('outputDimensions');
+        const convertBtn = document.getElementById('convertBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const conversionStatus = document.getElementById('conversionStatus');
+        const modeToggle = document.getElementById('modeToggle');
+        const pngOptions = document.getElementById('pngOptions');
+        const sizeSlider = document.getElementById('sizeSlider');
+        const sizeValue = document.getElementById('sizeValue');
+        const presetButtons = document.querySelectorAll('.preset-btn');
+        const backgroundButtons = document.querySelectorAll('.format-btn[data-bg]');
+        const colorPicker = document.getElementById('colorPicker');
+        const colorValue = document.getElementById('colorValue');
+        const customColorGroup = document.getElementById('customColorGroup');
+        const aspectCheckbox = document.getElementById('aspectCheckbox');
+        const aspectLabel = document.getElementById('preserveAspectLabel');
+        const antiAliasCheckbox = document.getElementById('antiAliasCheckbox');
+        const antiAliasLabel = document.getElementById('antiAliasLabel');
+        const compressionComparison = document.getElementById('compressionComparison');
+        const vectorSize = document.getElementById('vectorSize');
+        const rasterSize = document.getElementById('rasterSize');
+        const scaleFactor = document.getElementById('scaleFactor');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const svgInputArea = document.getElementById('svgInputArea');
+        const svgTextarea = document.getElementById('svgTextarea');
+        const updateSvgBtn = document.getElementById('updateSvgBtn');
+        const backgroundPreview = document.getElementById('backgroundPreview');
+        const backgroundPreviewImage = document.getElementById('backgroundPreviewImage');
+        
+        // State variables
+        let svgContent = '';
+        let originalFileName = '';
+        let originalFileSize = 0;
+        let originalWidth = 0;
+        let originalHeight = 0;
+        let outputSize = 1024; // Default output size
+        let backgroundColor = 'transparent'; // 'transparent', 'white', or 'custom'
+        let customColor = '#ffffff';
+        let preserveAspectRatio = true;
+        let antiAliasing = true;
+        let convertedImageUrl = null;
+        
+        // Dark mode toggle
+        modeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+        });
+        
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+        
+        // Size slider update
+        sizeSlider.addEventListener('input', (e) => {
+            outputSize = parseInt(e.target.value);
+            sizeValue.textContent = `${outputSize}px`;
+            
+            // Update preset buttons
+            presetButtons.forEach(btn => {
+                const btnSize = parseInt(btn.dataset.size);
+                btn.classList.toggle('active', btnSize === outputSize);
+            });
+            
+            // Update output dimensions
+            updateDimensions();
+            
+            // If there's already a converted image, re-convert with new size
+            if (convertedImageUrl && svgContent) {
+                convertToPng();
+            }
+        });
+        
+        // Preset button click
+        presetButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                outputSize = parseInt(btn.dataset.size);
+                sizeSlider.value = outputSize;
+                sizeValue.textContent = `${outputSize}px`;
+                
+                // Update preset buttons
+                presetButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Update output dimensions
+                updateDimensions();
+                
+                // If there's already a converted image, re-convert with new size
+                if (convertedImageUrl && svgContent) {
+                    convertToPng();
+                }
+            });
+        });
+        
+        // Background selection
+        backgroundButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                backgroundButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                backgroundColor = btn.dataset.bg;
+                
+                // Show/hide custom color picker
+                customColorGroup.style.display = backgroundColor === 'custom' ? 'block' : 'none';
+                
+                // Update background preview
+                updateBackgroundPreview();
+                
+                // If there's already a converted image, re-convert with new background
+                if (convertedImageUrl && svgContent) {
+                    convertToPng();
+                }
+            });
+        });
+        
+        // Color picker update
+        colorPicker.addEventListener('input', (e) => {
+            customColor = e.target.value;
+            colorValue.textContent = customColor;
+            
+            // If there's already a converted image, re-convert with new color
+            if (convertedImageUrl && svgContent && backgroundColor === 'custom') {
+                convertToPng();
+            }
+        });
+        
+        // Aspect ratio toggle
+        aspectCheckbox.addEventListener('click', () => {
+            preserveAspectRatio = !preserveAspectRatio;
+            aspectCheckbox.classList.toggle('checked', preserveAspectRatio);
+            
+            // Update output dimensions
+            updateDimensions();
+            
+            // If there's already a converted image, re-convert with new setting
+            if (convertedImageUrl && svgContent) {
+                convertToPng();
+            }
+        });
+        
+        aspectLabel.addEventListener('click', () => {
+            preserveAspectRatio = !preserveAspectRatio;
+            aspectCheckbox.classList.toggle('checked', preserveAspectRatio);
+            
+            // Update output dimensions
+            updateDimensions();
+            
+            // If there's already a converted image, re-convert with new setting
+            if (convertedImageUrl && svgContent) {
+                convertToPng();
+            }
+        });
+        
+        // Anti-aliasing toggle
+        antiAliasCheckbox.addEventListener('click', () => {
+            antiAliasing = !antiAliasing;
+            antiAliasCheckbox.classList.toggle('checked', antiAliasing);
+            
+            // If there's already a converted image, re-convert with new setting
+            if (convertedImageUrl && svgContent) {
+                convertToPng();
+            }
+        });
+        
+        antiAliasLabel.addEventListener('click', () => {
+            antiAliasing = !antiAliasing;
+            antiAliasCheckbox.classList.toggle('checked', antiAliasing);
+            
+            // If there's already a converted image, re-convert with new setting
+            if (convertedImageUrl && svgContent) {
+                convertToPng();
+            }
+        });
+        
+        // Update SVG from textarea
+        updateSvgBtn.addEventListener('click', () => {
+            const newSvgContent = svgTextarea.value.trim();
+            if (newSvgContent && newSvgContent !== svgContent) {
+                svgContent = newSvgContent;
+                processSvgContent();
+            }
+        });
+        
+        // File upload area interactions
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        // Handle drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length) {
+                handleFiles(e.dataTransfer.files);
+            }
+        });
+        
+        // Handle file selection
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFiles(e.target.files);
+            }
+        });
+        
+        // Handle selected files
+        function handleFiles(files) {
+            // Only process the first file
+            const file = files[0];
+            
+            // Check if it's an SVG image
+            const isSvg = file.name.match(/\.(svg|SVG)$/i) || 
+                          file.type === 'image/svg+xml';
+            
+            if (!isSvg) {
+                showStatus('Please select an SVG file (.svg).', 'error');
+                return;
+            }
+            
+            originalFileName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+            originalFileSize = file.size;
+            
+            // Show loading indicator
+            loadingIndicator.style.display = 'flex';
+            uploadArea.style.display = 'none';
+            
+            // Display file info
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            
+            // Read the SVG file
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                svgContent = e.target.result;
+                svgTextarea.value = svgContent;
+                processSvgContent();
+            };
+            reader.onerror = () => {
+                showStatus('Error reading SVG file. Please try another file.', 'error');
+                loadingIndicator.style.display = 'none';
+                uploadArea.style.display = 'flex';
+            };
+            reader.readAsText(file);
+        }
+        
+        // Process SVG content
+        function processSvgContent() {
+            try {
+                // Create a temporary div to parse SVG
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = svgContent;
+                const svgElement = tempDiv.querySelector('svg');
+                
+                if (!svgElement) {
+                    throw new Error('No valid SVG element found');
+                }
+                
+                // Get original dimensions from SVG
+                const width = svgElement.getAttribute('width') || svgElement.getAttribute('viewBox')?.split(' ')[2] || '100';
+                const height = svgElement.getAttribute('height') || svgElement.getAttribute('viewBox')?.split(' ')[3] || '100';
+                
+                originalWidth = parseInt(width) || 100;
+                originalHeight = parseInt(height) || 100;
+                
+                // Update dimensions display
+                originalDimensions.textContent = `${originalWidth} × ${originalHeight}px`;
+                updateDimensions();
+                
+                // Create a blob URL for the SVG to display it
+                const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(blob);
+                
+                // Show preview of SVG
+                previewImage.src = url;
+                previewImage.style.display = 'block';
+                previewPlaceholder.style.display = 'none';
+                
+                // Show file info and options
+                fileInfo.style.display = 'flex';
+                svgInputArea.style.display = 'block';
+                pngOptions.style.display = 'block';
+                
+                // Reset conversion status
+                conversionStatus.style.display = 'none';
+                compressionComparison.style.display = 'none';
+                backgroundPreview.style.display = 'none';
+                
+                // Enable convert button
+                convertBtn.disabled = false;
+                
+                // Reset download button
+                downloadBtn.disabled = true;
+                downloadBtn.innerHTML = '<span>Download PNG</span>';
+                
+                // Hide loading indicator
+                loadingIndicator.style.display = 'none';
+                uploadArea.style.display = 'flex';
+                
+                // Clean up blob URL
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                
+            } catch (error) {
+                console.error('SVG processing error:', error);
+                showStatus(`Error processing SVG: ${error.message}. Please check your SVG code.`, 'error');
+                loadingIndicator.style.display = 'none';
+                uploadArea.style.display = 'flex';
+            }
+        }
+        
+        // Update output dimensions display
+        function updateDimensions() {
+            let outputWidth = outputSize;
+            let outputHeight = outputSize;
+            
+            if (preserveAspectRatio && originalWidth && originalHeight) {
+                const aspectRatio = originalWidth / originalHeight;
+                if (aspectRatio > 1) {
+                    // Wider than tall
+                    outputHeight = Math.round(outputSize / aspectRatio);
+                } else if (aspectRatio < 1) {
+                    // Taller than wide
+                    outputWidth = Math.round(outputSize * aspectRatio);
+                }
+            }
+            
+            outputDimensions.textContent = `${outputWidth} × ${outputHeight}px`;
+        }
+        
+        // Update background preview
+        function updateBackgroundPreview() {
+            if (backgroundColor === 'transparent') {
+                backgroundPreview.style.display = 'block';
+                
+                // Create a small preview with checkered background
+                const canvas = document.createElement('canvas');
+                canvas.width = 100;
+                canvas.height = 100;
+                const ctx = canvas.getContext('2d');
+                
+                // Draw checkered background
+                const size = 10;
+                for (let y = 0; y < canvas.height; y += size) {
+                    for (let x = 0; x < canvas.width; x += size) {
+                        ctx.fillStyle = (Math.floor(x / size) + Math.floor(y / size)) % 2 === 0 ? '#ccc' : '#fff';
+                        ctx.fillRect(x, y, size, size);
+                    }
+                }
+                
+                backgroundPreviewImage.src = canvas.toDataURL('image/png');
+            } else {
+                backgroundPreview.style.display = 'none';
+            }
+        }
+        
+        // Convert SVG to PNG
+        function convertToPng() {
+            if (!svgContent) return;
+            
+            // Calculate output dimensions
+            let outputWidth = outputSize;
+            let outputHeight = outputSize;
+            
+            if (preserveAspectRatio && originalWidth && originalHeight) {
+                const aspectRatio = originalWidth / originalHeight;
+                if (aspectRatio > 1) {
+                    // Wider than tall
+                    outputHeight = Math.round(outputSize / aspectRatio);
+                } else if (aspectRatio < 1) {
+                    // Taller than wide
+                    outputWidth = Math.round(outputSize * aspectRatio);
+                }
+            }
+            
+            // Create canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = outputWidth;
+            canvas.height = outputHeight;
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Set background
+            if (backgroundColor === 'white') {
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else if (backgroundColor === 'custom') {
+                ctx.fillStyle = customColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            // If transparent, leave canvas transparent
+            
+            // Create SVG blob
+            const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(svgBlob);
+            
+            // Create image from SVG
+            const img = new Image();
+            img.onload = () => {
+                // Enable image smoothing for anti-aliasing
+                ctx.imageSmoothingEnabled = antiAliasing;
+                ctx.imageSmoothingQuality = 'high';
+                
+                // Draw SVG onto canvas
+                ctx.drawImage(img, 0, 0, outputWidth, outputHeight);
+                
+                // Convert to PNG data URL
+                convertedImageUrl = canvas.toDataURL('image/png');
+                
+                // Update preview with converted image
+                previewImage.src = convertedImageUrl;
+                
+                // Enable download button
+                downloadBtn.disabled = false;
+                
+                // Update comparison info
+                updateComparisonInfo();
+                
+                // Clean up URL
+                URL.revokeObjectURL(url);
+            };
+            
+            img.onerror = () => {
+                showStatus('Error converting SVG to PNG. The SVG might contain unsupported features.', 'error');
+                URL.revokeObjectURL(url);
+            };
+            
+            img.src = url;
+        }
+        
+        // Update comparison information
+        function updateComparisonInfo() {
+            if (!convertedImageUrl) return;
+            
+            // Calculate converted file size (approximate)
+            const base64Length = convertedImageUrl.length - 'data:image/png;base64,'.length;
+            const rasterFileSize = Math.ceil(base64Length * 3 / 4);
+            
+            // Calculate scale factor
+            const scale = outputSize / Math.max(originalWidth, originalHeight);
+            
+            // Update comparison display
+            vectorSize.textContent = formatFileSize(originalFileSize);
+            rasterSize.textContent = formatFileSize(rasterFileSize);
+            scaleFactor.textContent = `${scale.toFixed(2)}x`;
+            
+            compressionComparison.style.display = 'block';
+        }
+        
+        // Convert button click handler
+        convertBtn.addEventListener('click', () => {
+            if (!svgContent) {
+                showStatus('Please upload or enter an SVG first.', 'error');
+                return;
+            }
+            
+            // Show converting status
+            showStatus('Converting SVG to PNG...', 'success');
+            
+            // Simulate conversion process
+            setTimeout(() => {
+                convertToPng();
+                
+                // Calculate dimensions for status message
+                let outputWidth = outputSize;
+                let outputHeight = outputSize;
+                
+                if (preserveAspectRatio && originalWidth && originalHeight) {
+                    const aspectRatio = originalWidth / originalHeight;
+                    if (aspectRatio > 1) {
+                        outputHeight = Math.round(outputSize / aspectRatio);
+                    } else if (aspectRatio < 1) {
+                        outputWidth = Math.round(outputSize * aspectRatio);
+                    }
+                }
+                
+                // Show success status
+                const bgText = backgroundColor === 'transparent' ? 'transparent background' : 
+                             backgroundColor === 'white' ? 'white background' : `custom background (${customColor})`;
+                const aspectText = preserveAspectRatio ? 'aspect ratio preserved' : 'square output';
+                const aliasText = antiAliasing ? 'with anti-aliasing' : 'without anti-aliasing';
+                showStatus(`Conversion successful! ${outputWidth}×${outputHeight}px, ${bgText}, ${aspectText}, ${aliasText}.`, 'success');
+            }, 600);
+        });
+        
+        // Download converted PNG
+        downloadBtn.addEventListener('click', () => {
+            if (!convertedImageUrl) {
+                showStatus('No converted image available.', 'error');
+                return;
+            }
+            
+            // Create a temporary link element
+            const link = document.createElement('a');
+            link.href = convertedImageUrl;
+            
+            // Generate filename with size
+            const sizeSuffix = `_${outputSize}px`;
+            link.download = `${originalFileName || 'converted'}${sizeSuffix}.png`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Show download confirmation
+            showStatus('Download started!', 'success');
+            
+            // Change button text briefly
+            const originalText = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = '<span>✓ Downloaded</span>';
+            
+            setTimeout(() => {
+                downloadBtn.innerHTML = originalText;
+            }, 2000);
+        });
+        
+        // Clear all
+        clearBtn.addEventListener('click', () => {
+            // Reset everything
+            svgContent = '';
+            originalFileName = '';
+            originalFileSize = 0;
+            originalWidth = 0;
+            originalHeight = 0;
+            outputSize = 1024;
+            backgroundColor = 'transparent';
+            customColor = '#ffffff';
+            preserveAspectRatio = true;
+            antiAliasing = true;
+            convertedImageUrl = null;
+            
+            // Reset UI
+            fileInput.value = '';
+            previewImage.src = '';
+            previewImage.style.display = 'none';
+            previewPlaceholder.style.display = 'block';
+            fileInfo.style.display = 'none';
+            svgInputArea.style.display = 'none';
+            pngOptions.style.display = 'none';
+            compressionComparison.style.display = 'none';
+            loadingIndicator.style.display = 'none';
+            uploadArea.style.display = 'flex';
+            backgroundPreview.style.display = 'none';
+            svgTextarea.value = '';
+            
+            // Reset controls
+            sizeSlider.value = 1024;
+            sizeValue.textContent = '1024px';
+            colorPicker.value = '#ffffff';
+            colorValue.textContent = '#ffffff';
+            customColorGroup.style.display = 'none';
+            aspectCheckbox.classList.add('checked');
+            antiAliasCheckbox.classList.add('checked');
+            
+            // Reset preset buttons
+            presetButtons.forEach(btn => btn.classList.remove('active'));
+            presetButtons[3].classList.add('active'); // Large (1024px)
+            
+            // Reset background buttons
+            backgroundButtons.forEach(btn => btn.classList.remove('active'));
+            backgroundButtons[0].classList.add('active'); // Transparent
+            
+            // Reset buttons
+            convertBtn.disabled = true;
+            downloadBtn.disabled = true;
+            downloadBtn.innerHTML = '<span>Download PNG</span>';
+            
+            // Show cleared status briefly
+            showStatus('All cleared. Upload a new SVG file.', 'success');
+            setTimeout(() => {
+                conversionStatus.style.display = 'none';
+            }, 3000);
+        });
+        
+        // Show status message
+        function showStatus(message, type) {
+            conversionStatus.textContent = message;
+            conversionStatus.className = 'conversion-status';
+            conversionStatus.classList.add(`status-${type}`);
+            conversionStatus.style.display = 'block';
+        }
+        
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Initialize with a disabled convert button
+        convertBtn.disabled = true;
+        
+        // Initial background preview
+        updateBackgroundPreview();
+    </script>
+</body>
+</html>
